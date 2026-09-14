@@ -1,0 +1,57 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+enum class SeatType {
+    SILVER,
+    GOLD,
+    PLATINUM
+};
+
+class Seat {
+private:
+    int number;
+    SeatType type;
+
+public:
+    Seat(int number, SeatType type) {
+        this->number = number;
+        this->type = type;
+    }
+
+    int getNumber() const {
+        return number;
+    }
+
+    SeatType getType() const {
+        return type;
+    }
+};
+
+class Screen {
+private:
+    int screenNumber;
+    vector<Seat> seats;
+
+public:
+    Screen(int screenNumber) {
+        this->screenNumber = screenNumber;
+
+        for (int i = 1; i <= 10; i++) {
+            if (i <= 4)
+                seats.emplace_back(i, SeatType::SILVER);
+            else if (i <= 7)
+                seats.emplace_back(i, SeatType::GOLD);
+            else
+                seats.emplace_back(i, SeatType::PLATINUM);
+        }
+    }
+
+    int getScreenNumber() const {
+        return screenNumber;
+    }
+
+    const vector<Seat>& getSeats() const {
+        return seats;
+    }
+};
