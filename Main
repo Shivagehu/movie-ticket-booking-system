@@ -1,0 +1,674 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+// =====================================================
+// Complete working program for GitHub demo
+// =====================================================
+
+enum class SeatType {
+    SILVER,
+    GOLD,
+    PLATINUM
+};
+
+enum class SeatStatus {
+    AVAILABLE,
+    BOOKED
+};
+
+class Movie {
+private:
+    string title;
+    string language;
+    int duration;
+
+public:
+    Movie(string title, string language, int duration) {
+        this->title = title;
+        this->language = language;
+        this->duration = duration;
+    }
+
+    string getTitle() const {
+        return title;
+    }
+
+    string getLanguage() const {
+        return language;
+    }
+
+    int getDuration() const {
+        return duration;
+    }
+};
+
+class Seat {
+private:
+    int number;
+    SeatType type;
+
+public:
+    Seat(int number, SeatType type) {
+        this->number = number;
+        this->type = type;
+    }
+
+    int getNumber() const {
+        return number;
+    }
+
+    SeatType getType() const {
+        return type;
+    }
+
+    string getTypeName() const {
+
+        if (type == SeatType::SILVER)
+            return "SILVER";
+
+        if (type == SeatType::GOLD)
+            return "GOLD";
+
+        return "PLATINUM";
+    }
+};
+
+class ShowSeat {
+private:
+    Seat seat;
+    SeatStatus status;
+
+public:
+    ShowSeat(Seat seat) : seat(seat) {
+        status = SeatStatus::AVAILABLE;
+    }
+
+    int getNumber() const {
+        return seat.getNumber();
+    }
+
+    SeatType getType() const {
+        return seat.getType();
+    }
+
+    bool isAvailable() const {
+        return status == SeatStatus::AVAILABLE;
+    }
+
+    bool book() {
+
+        if (!isAvailable())
+            return false;
+
+        status = SeatStatus::BOOKED;
+        return true;
+    }
+
+    void cancel() {
+        status = SeatStatus::AVAILABLE;
+    }
+};
+
+class Screen {
+private:
+    int number;
+
+public:
+    Screen(int number) {
+        this->number = number;
+    }
+
+    int getNumber() const {
+        return number;
+    }
+};
+
+class Show {
+private:
+    int id;
+    Movie* movie;
+    Screen* screen;
+    string time;
+    vector<ShowSeat> seats;
+
+public:
+    Show(int id,
+         Movie* movie,
+         Screen* screen,
+         string time) {
+
+        this->id = id;
+        this->movie = movie;
+        this->screen = screen;
+        this->time = time;
+
+        for (int i = 1; i <= 10; i++) {
+
+            SeatType type;
+
+            if (i <= 4)
+                type = SeatType::SILVER;
+            else if (i <= 7)
+                type = SeatType::GOLD;
+            else
+                type = SeatType::PLATINUM;
+
+            seats.emplace_back(
+                Seat(i, type)
+            );
+        }
+    }
+
+    int getId() const {
+        return id;
+    }
+
+    Movie* getMovie() const {
+        return movie;
+    }
+
+    Screen* getScreen() const {
+        return screen;
+    }
+
+    string getTime() const {
+        return time;
+    }
+
+    void displaySeats() {
+
+        cout << "\n--------- SEATS ---------\n";
+
+        for (ShowSeat& seat : seats) {
+
+            cout << "Seat "
+                 << seat.getNumber()
+                 << " - ";
+
+            if (seat.isAvailable())
+                cout << "AVAILABLE";
+            else
+                cout << "BOOKED";
+
+            cout << endl;
+        }
+    }
+
+    ShowSeat* findSeat(int number) {
+
+        for (ShowSeat& seat : seats) {
+
+            if (seat.getNumber() == number)
+                return &seat;
+        }
+
+        return nullptr;
+    }
+};
+
+class Payment {
+public:
+    virtual bool pay(double amount) = 0;
+
+    virtual ~Payment() {}
+};
+
+class UpiPayment : public Payment {
+public:
+
+    bool pay(double amount) override {
+
+        cout << "UPI Payment: Rs. "
+             << amount << endl;
+
+        char choice;
+
+        cout << "Payment successful? (Y/N): ";
+        cin >> choice;
+
+        return choice == 'Y' ||
+               choice == 'y';
+    }
+};
+
+class CardPayment : public Payment {
+public:
+
+    bool pay(double amount) override {
+
+        cout << "Card Payment: Rs. "
+             << amount << endl;
+
+        char choice;
+
+        cout << "Payment successful? (Y/N): ";
+        cin >> choice;
+
+        return choice == 'Y' ||
+               choice == 'y';
+    }
+};
+
+class CashPayment : public Payment {
+public:
+
+    bool pay(double amount) override {
+
+        cout << "Cash received: Rs. "
+             << amount << endl;
+
+        return true;
+    }
+};
+
+class Booking {
+private:
+    static int nextId;
+
+    int id;
+    Show* show;
+    vector<ShowSeat*> seats;
+    double amount;
+    bool cancelled;
+
+public:
+
+    Booking(Show* show,
+            vector<ShowSeat*> seats,
+            double amount) {
+
+        this->show = show;
+        this->seats = seats;
+        this->amount = amount;
+
+        id = nextId++;
+        cancelled = false;
+    }
+
+    int getId() const {
+        return id;
+    }
+
+    void cancel() {
+
+        if (cancelled)
+            return;
+
+        for (ShowSeat* seat : seats)
+            seat->cancel();
+
+        cancelled = true;
+
+        cout << "Booking cancelled successfully.\n";
+        cout << "Seats are AVAILABLE again.\n";
+    }
+
+    void printTicket() {
+
+        cout << "\n";
+        cout << "====================================\n";
+        cout << "              TICKET\n";
+        cout << "====================================\n";
+
+        cout << "Booking ID : "
+             << id << endl;
+
+        cout << "Movie      : "
+             << show->getMovie()->getTitle()
+             << endl;
+
+        cout << "Screen     : "
+             << show->getScreen()->getNumber()
+             << endl;
+
+        cout << "Time       : "
+             << show->getTime()
+             << endl;
+
+        cout << "Seats      : ";
+
+        for (ShowSeat* seat : seats)
+            cout << seat->getNumber() << " ";
+
+        cout << endl;
+
+        cout << "Total      : Rs. "
+             << amount << endl;
+
+        cout << "Status     : CONFIRMED\n";
+
+        cout << "====================================\n";
+    }
+};
+
+int Booking::nextId = 1001;
+
+int main() {
+
+    Movie movie1(
+        "Avengers",
+        "English",
+        150
+    );
+
+    Movie movie2(
+        "3 Idiots",
+        "Hindi",
+        170
+    );
+
+    Screen screen1(1);
+    Screen screen2(2);
+
+    vector<Movie*> movies = {
+        &movie1,
+        &movie2
+    };
+
+    Show show1(
+        1,
+        &movie1,
+        &screen1,
+        "10:00 AM"
+    );
+
+    Show show2(
+        2,
+        &movie1,
+        &screen2,
+        "02:00 PM"
+    );
+
+    Show show3(
+        3,
+        &movie2,
+        &screen1,
+        "06:00 PM"
+    );
+
+    vector<Show*> shows = {
+        &show1,
+        &show2,
+        &show3
+    };
+
+    vector<Booking*> bookings;
+
+    int choice;
+
+    do {
+
+        cout << "\n";
+        cout << "====================================\n";
+        cout << "       MOVIE TICKET BOOKING\n";
+        cout << "====================================\n";
+
+        cout << "1. List Movies\n";
+        cout << "2. List Shows\n";
+        cout << "3. View Seats\n";
+        cout << "4. Book Ticket\n";
+        cout << "5. Cancel Booking\n";
+        cout << "6. Exit\n";
+
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        switch (choice) {
+
+        case 1:
+
+            cout << "\nMovies:\n";
+
+            for (int i = 0;
+                 i < movies.size();
+                 i++) {
+
+                cout << i + 1
+                     << ". "
+                     << movies[i]->getTitle()
+                     << " | "
+                     << movies[i]->getLanguage()
+                     << endl;
+            }
+
+            break;
+
+        case 2:
+
+            cout << "\nShows:\n";
+
+            for (Show* show : shows) {
+
+                cout << "Show ID: "
+                     << show->getId()
+                     << " | Movie: "
+                     << show->getMovie()
+                            ->getTitle()
+                     << " | Screen: "
+                     << show->getScreen()
+                            ->getNumber()
+                     << " | Time: "
+                     << show->getTime()
+                     << endl;
+            }
+
+            break;
+
+        case 3: {
+
+            int id;
+
+            cout << "Enter Show ID: ";
+            cin >> id;
+
+            Show* selected = nullptr;
+
+            for (Show* show : shows) {
+
+                if (show->getId() == id) {
+                    selected = show;
+                    break;
+                }
+            }
+
+            if (selected)
+                selected->displaySeats();
+            else
+                cout << "Show not found.\n";
+
+            break;
+        }
+
+        case 4: {
+
+            int id;
+
+            cout << "Enter Show ID: ";
+            cin >> id;
+
+            Show* selected = nullptr;
+
+            for (Show* show : shows) {
+
+                if (show->getId() == id) {
+                    selected = show;
+                    break;
+                }
+            }
+
+            if (!selected) {
+
+                cout << "Show not found.\n";
+                break;
+            }
+
+            selected->displaySeats();
+
+            int count;
+
+            cout << "How many seats? ";
+            cin >> count;
+
+            vector<ShowSeat*> selectedSeats;
+
+            bool valid = true;
+
+            for (int i = 0;
+                 i < count;
+                 i++) {
+
+                int number;
+
+                cout << "Enter seat number: ";
+                cin >> number;
+
+                ShowSeat* seat =
+                    selected->findSeat(number);
+
+                if (!seat) {
+
+                    cout << "Invalid seat.\n";
+                    valid = false;
+                    break;
+                }
+
+                if (!seat->isAvailable()) {
+
+                    cout << "Seat already BOOKED.\n";
+                    valid = false;
+                    break;
+                }
+
+                selectedSeats.push_back(seat);
+            }
+
+            if (!valid)
+                break;
+
+            double total = 0;
+
+            for (ShowSeat* seat :
+                 selectedSeats) {
+
+                if (seat->getType()
+                    == SeatType::SILVER)
+
+                    total += 150;
+
+                else if (seat->getType()
+                         == SeatType::GOLD)
+
+                    total += 250;
+
+                else
+
+                    total += 400;
+            }
+
+            cout << "\nTotal Amount: Rs. "
+                 << total << endl;
+
+            cout << "\nPayment Method\n";
+            cout << "1. UPI\n";
+            cout << "2. Card\n";
+            cout << "3. Cash\n";
+
+            int paymentChoice;
+            cin >> paymentChoice;
+
+            Payment* payment = nullptr;
+
+            if (paymentChoice == 1)
+                payment = new UpiPayment();
+
+            else if (paymentChoice == 2)
+                payment = new CardPayment();
+
+            else if (paymentChoice == 3)
+                payment = new CashPayment();
+
+            else {
+
+                cout << "Invalid payment method.\n";
+                break;
+            }
+
+            if (!payment->pay(total)) {
+
+                cout << "Payment FAILED.\n";
+                cout << "Booking NOT confirmed.\n";
+
+                delete payment;
+                break;
+            }
+
+            for (ShowSeat* seat :
+                 selectedSeats)
+
+                seat->book();
+
+            Booking* booking =
+                new Booking(
+                    selected,
+                    selectedSeats,
+                    total
+                );
+
+            bookings.push_back(booking);
+
+            cout << "\nBooking successful!\n";
+
+            booking->printTicket();
+
+            delete payment;
+
+            break;
+        }
+
+        case 5: {
+
+            int bookingId;
+
+            cout << "Enter Booking ID: ";
+            cin >> bookingId;
+
+            bool found = false;
+
+            for (Booking* booking :
+                 bookings) {
+
+                if (booking->getId()
+                    == bookingId) {
+
+                    booking->cancel();
+
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+                cout << "Booking not found.\n";
+
+            break;
+        }
+
+        case 6:
+
+            cout << "Thank you!\n";
+            break;
+
+        default:
+
+            cout << "Invalid menu choice.\n";
+        }
+
+    } while (choice != 6);
+
+    for (Booking* booking : bookings)
+        delete booking;
+
+    return 0;
+}
