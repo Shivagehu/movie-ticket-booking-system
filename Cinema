@@ -1,0 +1,39 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class Screen {
+private:
+    int screenNumber;
+
+public:
+    Screen(int screenNumber) {
+        this->screenNumber = screenNumber;
+    }
+
+    int getScreenNumber() const {
+        return screenNumber;
+    }
+};
+
+class Cinema {
+private:
+    string name;
+    vector<Screen> screens;
+
+public:
+    Cinema(string name) {
+        this->name = name;
+
+        screens.emplace_back(1);
+        screens.emplace_back(2);
+    }
+
+    string getName() const {
+        return name;
+    }
+
+    const vector<Screen>& getScreens() const {
+        return screens;
+    }
+};
