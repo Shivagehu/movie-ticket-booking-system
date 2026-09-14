@@ -1,0 +1,169 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+class Movie {
+private:
+    string title;
+
+public:
+    Movie(string title) {
+        this->title = title;
+    }
+
+    string getTitle() const {
+        return title;
+    }
+};
+
+class Screen {
+private:
+    int screenNumber;
+
+public:
+    Screen(int screenNumber) {
+        this->screenNumber = screenNumber;
+    }
+
+    int getScreenNumber() const {
+        return screenNumber;
+    }
+};
+
+enum class SeatType {
+    SILVER,
+    GOLD,
+    PLATINUM
+};
+
+class Seat {
+private:
+    int number;
+    SeatType type;
+
+public:
+    Seat(int number, SeatType type) {
+        this->number = number;
+        this->type = type;
+    }
+
+    int getNumber() const {
+        return number;
+    }
+
+    SeatType getType() const {
+        return type;
+    }
+};
+
+enum class SeatStatus {
+    AVAILABLE,
+    BOOKED
+};
+
+class ShowSeat {
+private:
+    Seat seat;
+    SeatStatus status;
+
+public:
+    ShowSeat(Seat seat) : seat(seat) {
+        status = SeatStatus::AVAILABLE;
+    }
+
+    int getSeatNumber() const {
+        return seat.getNumber();
+    }
+
+    SeatType getSeatType() const {
+        return seat.getType();
+    }
+
+    bool isAvailable() const {
+        return status == SeatStatus::AVAILABLE;
+    }
+
+    bool bookSeat() {
+        if (!isAvailable())
+            return false;
+
+        status = SeatStatus::BOOKED;
+        return true;
+    }
+
+    string getStatus() const {
+        return isAvailable() ? "AVAILABLE" : "BOOKED";
+    }
+};
+
+class Show {
+private:
+    int showId;
+    Movie* movie;
+    Screen* screen;
+    string startTime;
+    vector<ShowSeat> showSeats;
+
+public:
+    Show(int showId, Movie* movie, Screen* screen, string startTime) {
+        this->showId = showId;
+        this->movie = movie;
+        this->screen = screen;
+        this->startTime = startTime;
+
+        for (int i = 1; i <= 10; i++) {
+            SeatType type;
+
+            if (i <= 4)
+                type = SeatType::SILVER;
+            else if (i <= 7)
+                type = SeatType::GOLD;
+            else
+                type = SeatType::PLATINUM;
+
+            showSeats.emplace_back(Seat(i, type));
+        }
+    }
+
+    int getShowId() const {
+        return showId;
+    }
+
+    Movie* getMovie() const {
+        return movie;
+    }
+
+    Screen* getScreen() const {
+        return screen;
+    }
+
+    string getStartTime() const {
+        return startTime;
+    }
+
+    vector<ShowSeat>& getShowSeats() {
+        return showSeats;
+    }
+
+    ShowSeat* findSeat(int number) {
+        for (ShowSeat& seat : showSeats) {
+            if (seat.getSeatNumber() == number)
+                return &seat;
+        }
+
+        return nullptr;
+    }
+
+    void displaySeats() const {
+        cout << "\n--------- SEAT LAYOUT ---------\n";
+
+        for (const ShowSeat& seat : showSeats) {
+            cout << "Seat "
+                 << seat.getSeatNumber()
+                 << " : "
+                 << seat.getStatus()
+                 << endl;
+        }
+    }
+};
