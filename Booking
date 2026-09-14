@@ -1,0 +1,84 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+enum class BookingStatus {
+    CONFIRMED,
+    CANCELLED,
+    FAILED
+};
+
+class ShowSeat {
+public:
+    virtual int getSeatNumber() const = 0;
+    virtual bool cancelSeat() = 0;
+
+    virtual ~ShowSeat() {}
+};
+
+class Customer {};
+
+class Show {};
+
+class Booking {
+private:
+    static int nextBookingId;
+
+    int bookingId;
+
+    Customer* customer;
+    Show* show;
+
+    vector<ShowSeat*> seats;
+
+    double totalAmount;
+
+    BookingStatus status;
+
+public:
+
+    Booking(Customer* customer,
+            Show* show,
+            vector<ShowSeat*> seats,
+            double totalAmount) {
+
+        this->customer = customer;
+        this->show = show;
+        this->seats = seats;
+        this->totalAmount = totalAmount;
+
+        bookingId = nextBookingId++;
+
+        status = BookingStatus::CONFIRMED;
+    }
+
+    int getBookingId() const {
+        return bookingId;
+    }
+
+    Show* getShow() const {
+        return show;
+    }
+
+    vector<ShowSeat*> getSeats() const {
+        return seats;
+    }
+
+    double getTotalAmount() const {
+        return totalAmount;
+    }
+
+    BookingStatus getStatus() const {
+        return status;
+    }
+
+    void cancel() {
+
+        for (ShowSeat* seat : seats)
+            seat->cancelSeat();
+
+        status = BookingStatus::CANCELLED;
+    }
+};
+
+int Booking::nextBookingId = 1001;
