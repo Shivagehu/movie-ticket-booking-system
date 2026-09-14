@@ -1,0 +1,34 @@
+#include <iostream>
+using namespace std;
+
+class Booking {
+public:
+    virtual int getBookingId() const = 0;
+    virtual double getTotalAmount() const = 0;
+
+    virtual ~Booking() {}
+};
+
+class TicketPrinter {
+public:
+
+    void print(const Booking& booking) const {
+
+        cout << "\n";
+        cout << "====================================\n";
+        cout << "              TICKET\n";
+        cout << "====================================\n";
+
+        cout << "Booking ID : "
+             << booking.getBookingId()
+             << endl;
+
+        cout << "Total      : Rs. "
+             << booking.getTotalAmount()
+             << endl;
+
+        cout << "Status     : CONFIRMED\n";
+
+        cout << "====================================\n";
+    }
+};
