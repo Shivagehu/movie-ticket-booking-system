@@ -1,0 +1,124 @@
+#include <iostream>
+#include <vector>
+#include <memory>
+using namespace std;
+
+class Customer {};
+
+class ShowSeat {
+public:
+    virtual bool isAvailable() const = 0;
+    virtual bool bookSeat() = 0;
+    virtual int getSeatNumber() const = 0;
+
+    virtual ~ShowSeat() {}
+};
+
+class Show {
+public:
+    virtual ShowSeat* findSeat(int number) = 0;
+
+    virtual ~Show() {}
+};
+
+class Payment {
+public:
+    virtual bool pay(double amount) = 0;
+
+    virtual ~Payment() {}
+};
+
+class Booking {
+private:
+    static int nextBookingId;
+
+    int bookingId;
+    double amount;
+
+public:
+    Booking(double amount) {
+        this->amount = amount;
+        bookingId = nextBookingId++;
+    }
+
+    int getBookingId() const {
+        return bookingId;
+    }
+
+    double getTotalAmount() const {
+        return amount;
+    }
+};
+
+int Booking::nextBookingId = 1001;
+
+class BookingService {
+private:
+    vector<unique_ptr<Booking>> bookings;
+
+public:
+
+    Booking* bookTicket(
+        Customer* customer,
+        Show* show,
+        const vector<int>& seatNumbers,
+        unique_ptr<Payment> payment) {
+
+        vector<ShowSeat*> selectedSeats;
+
+        for (int number : seatNumbers) {
+
+            ShowSeat* seat =
+                show->findSeat(number);
+
+            if (seat == nullptr) {
+
+                cout << "Invalid seat number.\n";
+                return nullptr;
+            }
+
+            if (!seat->isAvailable()) {
+
+                cout << "Seat "
+                     << number
+                     << " is already BOOKED.\n";
+
+                return nullptr;
+            }
+
+            selectedSeats.push_back(seat);
+        }
+
+        // Simple pricing
+        double total =
+            selectedSeats.size() * 150;
+
+        cout << "Total Amount: Rs. "
+             << total << endl;
+
+        if (!payment->pay(total)) {
+
+            cout << "Payment FAILED.\n";
+            cout << "Booking NOT confirmed.\n";
+
+            return nullptr;
+        }
+
+        for (ShowSeat* seat : selectedSeats)
+            seat->bookSeat();
+
+        auto booking =
+            make_unique<Booking>(total);
+
+        Booking* result = booking.get();
+
+        bookings.push_back(move(booking));
+
+        cout << "\nBooking successful!\n";
+        cout << "Booking ID: "
+             << result->getBookingId()
+             << endl;
+
+        return result;
+    }
+};
